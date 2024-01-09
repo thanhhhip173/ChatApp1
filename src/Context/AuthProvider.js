@@ -1,41 +1,44 @@
 import React from "react";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase/config";
-import { useState, useEffect } from "react";
-import { Spin, Button } from "antd";
+import { useState, useEffect, createContext } from "react";
+import { Spin } from "antd";
 
-export const AuthContext = React.createContext()
+export const AuthContext = createContext();
+console.log(AuthContext);
 export default function AuthProvider({ children }) {
-    const [user, setUser] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-    
-    const navigate = useNavigate();
-    // const 
-    const handleNav = useEffect(() => {
-        const unsubcribed = auth.onAuthStateChanged((user) => {
-            console.log('edeefe') 
-            if (user) {
-                const { displayName, email, uid, photoURL } = user;
-                setUser({
-                    displayName, 
-                    email, 
-                    uid, 
-                    photoURL
-                });
-                setIsLoading(false);
-                navigate('/');
-            }
-            navigate('/login')
-        })
+  const [user, setUser] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-        return () => {
-            unsubcribed();
-        }
+  const navigate = useNavigate();
+  // const
+  useEffect(() => {
+    const unsubcribed = auth.onAuthStateChanged((userInfo) => {
+      console.log(userInfo);
+      if (userInfo) {
+        const { displayName, email, uid, photoURL } = userInfo.providerData[0];
+        console.log(user);
+        setUser({
+          displayName,
+          email,
+          uid,
+          photoURL,
+        });
+        navigate("/");
+      } else {
+        navigate("/login");
+      }
+      setIsLoading(false);
+    });
 
-    }, [])
-    return (
-        <AuthContext.Provider value={{ user }}>
-            {isLoading ? <Spin /> : children}
-        </AuthContext.Provider>
-    )
+    return () => {
+      unsubcribed();
+    };
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user }}>
+      {isLoading ? <Spin /> : children}
+    </AuthContext.Provider>
+  );
 }

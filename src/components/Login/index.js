@@ -1,45 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button, Row, Col, Typography } from 'antd';
 import { auth, ggProvider, fbProvider } from '../../firebase/config';
-import { signInWithPopup } from "firebase/auth";
-import ChatRoom from '../ChatRoom';
+import { addUser } from "../../firebase/services";
+import { signInWithPopup, getAdditionalUserInfo } from "firebase/auth";
 
 const { Title } = Typography;
 
 export default function Login() {
-    const [value, setValue] = useState('')
-    const handleGgLogin = () => {
-        signInWithPopup(auth, ggProvider)
-            .then((data) => {
-                setValue(data.user.email)
-                localStorage.setItem("email", data.user.email)
+    const handleGgLogin = async () => {
+        const user = await signInWithPopup(auth, ggProvider);
+        console.log(getAdditionalUserInfo(user))
+        if (getAdditionalUserInfo(user).isNewUser === true) {
+            addUser('users', {
+                displayName: user.user.providerData[0].displayName,
+                email: user.user.providerData[0].email,
+                photoURL: user.user.providerData[0].photoURL,
+                UID: user.user.providerData[0].displayName,
+                providerId: user.user.providerData[0].providerId,
             })
+        }
     }
-
-    useEffect(() => {
-        setValue(localStorage.getItem('email'))
-    })
-
-    // const handleGgLogin = async () => {
-    //     const reponse = await signInWithPopup(ggProvider);
-    //     console.log(reponse);
-    // };
-    console.log(value)
     return (
         <div>
-            {value ? <ChatRoom /> :
-                <Row justify={"center"} style={{ height: 800 }}>
-                    <Col span={8}>
-                        <Title style={{ textAlign: "center" }}>Fun Chat</Title>
-                        <Button style={{ width: '100%', marginBottom: 5 }} onClick={handleGgLogin}>
-                            Đăng nhập bằng Google
-                        </Button>
-                        <Button style={{ width: '100%' }} >
+            <Row justify={"center"} style={{ height: 800 }}>
+                <Col span={8}>
+                    <Title style={{ textAlign: "center" }}>Fun Chat</Title>
+                    <Button style={{ width: '100%', marginBottom: 5 }} onClick={handleGgLogin}>
+                        Đăng nhập bằng Google
+                    </Button>
+                    <Button style={{ width: '100%' }} onClick={handleGgLogin} >
                             Đăng nhập bằng Facebook
-                        </Button>
-                    </Col>
-                </Row>
-            }
+                    </Button>
+                </Col>
+            </Row>
         </div>
     )
 }

@@ -1,11 +1,7 @@
 // import firebase from 'firebase/compat/app';
-// import 'firebase/auth';
-// import 'firebase/firestore';
-// import "firebase/database";
-// import "firebase/storage";
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-// import { GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, connectAuthEmulator } from "firebase/auth";
 
 
 const firebaseConfig = {
@@ -18,8 +14,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth = getAuth();
+connectAuthEmulator(auth, "http://127.0.0.1:9099", {disableWarnings:true});
+const db = getFirestore(app);
+connectFirestoreEmulator(db, 'localhost', 8080);
 const ggProvider = new GoogleAuthProvider();
 const fbProvider = new GoogleAuthProvider();
 
 export { auth, ggProvider, fbProvider};
+export default db;

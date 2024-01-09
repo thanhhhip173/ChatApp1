@@ -1,11 +1,8 @@
-import db from './config';  
-import firebase from 'firebase/compat/app';
-export const addDocument = async (collection, data) => {
-    const query = db.collection(collection);
-    await query.add({
-        ...data,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    console.log(data)
-
-}   
+import db from "./config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+export const addUser = async (collectionName, data) => {
+  await addDoc(collection(db, collectionName), {
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+};
